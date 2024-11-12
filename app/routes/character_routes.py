@@ -66,7 +66,7 @@ def add_greetings(char_id):
 
     for greeting in greetings:
         new_greeting = Greeting(
-            greeting_text = greeting.strip("\""),
+            greeting_text = greeting.strip("\""), #Removes quotes from each string
             character = character_obj
         )
         new_greetings.append(new_greeting)
@@ -78,10 +78,10 @@ def add_greetings(char_id):
 
 def generate_greetings(character):
     model = genai.GenerativeModel("gemini-1.5-flash")
-    input_message = f"I am writing a video game in the style of The Witcher. I have an npc named {character.name} who is {character.age} years old. They are a {character.occupation} who has a {character.personality} personality. Please generate a python style list of 10 stock phrases they might use when the main character talks to them. Please Return just the list without a variable name and square brackets."
+    input_message = f"I am writing a rantasy RPG video game. I have an npc named {character.name} who is {character.age} years old. They are a {character.occupation} who has a {character.personality} personality. Please generate a python style list of 10 stock phrases they might use when the main character talks to them. Please Return just the list without a variable name and square brackets."
     response = model.generate_content(input_message)
-    response_sani = response.text.split("\n")
-    return response_sani[:-1]
+    response_split = response.text.split("\n") #Splits response into a list of stock phrases, ends up with an empty string at index -1
+    return response_split[:-1] #Returns the stock phrases list, just without the empty string at the end
 
 
 def validate_model(cls,id):
