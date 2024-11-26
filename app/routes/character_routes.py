@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, abort, make_response
+from flask import Blueprint, request, abort, make_response
 from ..db import db
 from ..models.character import Character
 from ..models.greeting import Greeting
@@ -20,7 +20,7 @@ def create_character():
         db.session.add(new_character)
         db.session.commit()
 
-        return make_response(new_character.to_dict(), 201)
+        return new_character.to_dict(), 201
     
     except KeyError as e:
         abort(make_response({"message": f"missing required value: {e}"}, 400))
@@ -35,14 +35,14 @@ def get_characters():
     for character in characters:
         response.append(character.to_dict())
 
-    return jsonify(response)
+    return response
 
 @bp.get("/<char_id>/greetings")
 def get_greetings(char_id):
     character = validate_model(Character, char_id)
     
     if not character.greetings:
-        return make_response(jsonify(f"No greetings found for {character.name} "), 201)
+        return {"message": f"No greetings found for {character.name} "}, 201
     
     response = {"Character Name" : character.name,
                 "Greetings" : []}
@@ -51,7 +51,7 @@ def get_greetings(char_id):
             "greeting" : greeting.greeting_text
         })
     
-    return jsonify(response)
+    return response
 
 
 @bp.post("/<char_id>/generate")
@@ -60,7 +60,7 @@ def add_greetings(char_id):
     greetings = generate_greetings(character_obj)
 
     if character_obj.greetings:
-        return make_response(jsonify(f"Greetings already generated for {character_obj.name} "), 201)
+        return {"message": f"Greetings already generated for {character_obj.name} "}, 201
     
     new_greetings = []
 
@@ -74,11 +74,11 @@ def add_greetings(char_id):
     db.session.add_all(new_greetings)
     db.session.commit()
 
-    return make_response(jsonify(f"Greetings successfully added to {character_obj.name}"), 201)
+    return {"message": f"Greetings successfully added to {character_obj.name}"}, 201
 
 def generate_greetings(character):
     model = genai.GenerativeModel("gemini-1.5-flash")
-    input_message = f"I am writing a rantasy RPG video game. I have an npc named {character.name} who is {character.age} years old. They are a {character.occupation} who has a {character.personality} personality. Please generate a python style list of 10 stock phrases they might use when the main character talks to them. Please Return just the list without a variable name and square brackets."
+    input_message = f"I am writing a fantasy RPG video game. I have an npc named {character.name} who is {character.age} years old. They are a {character.occupation} who has a {character.personality} personality. Please generate a Python style list of 10 stock phrases they might use when the main character talks to them. Please return just the list without a variable name and square brackets."
     response = model.generate_content(input_message)
     response_split = response.text.split("\n") #Splits response into a list of stock phrases, ends up with an empty string at index -1
     return response_split[:-1] #Returns the stock phrases list, just without the empty string at the end
@@ -88,7 +88,7 @@ def validate_model(cls,id):
     try:
         id = int(id)
     except:
-        response =  response = {"message": f"{cls.__name__} {id} invalid"}
+        response = {"message": f"{cls.__name__} {id} invalid"}
         abort(make_response(response , 400))
 
     query = db.select(cls).where(cls.id == id)
