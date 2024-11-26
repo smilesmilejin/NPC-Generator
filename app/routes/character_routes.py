@@ -78,7 +78,7 @@ def add_greetings(char_id):
 
 def generate_greetings(character):
     model = genai.GenerativeModel("gemini-1.5-flash")
-    input_message = f"I am writing a rantasy RPG video game. I have an npc named {character.name} who is {character.age} years old. They are a {character.occupation} who has a {character.personality} personality. Please generate a python style list of 10 stock phrases they might use when the main character talks to them. Please Return just the list without a variable name and square brackets."
+    input_message = f"I am writing a fantasy RPG video game. I have an npc named {character.name} who is {character.age} years old. They are a {character.occupation} who has a {character.personality} personality. Please generate a Python style list of 10 stock phrases they might use when the main character talks to them. Please return just the list without a variable name and square brackets."
     response = model.generate_content(input_message)
     response_split = response.text.split("\n") #Splits response into a list of stock phrases, ends up with an empty string at index -1
     return response_split[:-1] #Returns the stock phrases list, just without the empty string at the end
